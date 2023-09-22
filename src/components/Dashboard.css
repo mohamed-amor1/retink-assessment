@@ -1,0 +1,47 @@
+#create-btn {
+  width: fit-content !important;
+  font-size: 16pt;
+  height: auto;
+  border-radius: 15px;
+  padding-left: 5%;
+  padding-right: 5%;
+  border: 2px solid purple;
+}
+#create-btn:hover {
+  background: linear-gradient(to right, #cc2b5e, #753a88);
+  color: white !important;
+}
+
+.social-media {
+  background-color: #f4f3f6;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 0;
+}
+
+h3 {
+  margin: 0 0 10px;
+}
+
+p {
+  margin: 0 0 10px;
+}
+
+.dashboard-card {
+  background: linear-gradient(to right, #d9a7c7, #fffcdc);
+}
+
+#create-btn-1 {
+  background-color: #754de8;
+  color: white;
+  padding-left: 4%;
+  padding-right: 4%;
+  border-radius: 20px;
+  height: 6vh;
+}
+
+#create-btn-1:hover {
+  background-color: #5e3eba;
+  box-shadow: rgba(17, 17, 26, 0.05) 0px 4px 16px,
+    rgba(17, 17, 26, 0.05) 0px 8px 32px;
+}
