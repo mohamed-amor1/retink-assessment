@@ -1,14 +1,31 @@
 import React, { useState } from "react";
 import { Button, Form, Input, message, Upload, Avatar } from "antd";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, storage } from "../../firebase";
+import { auth } from "../../firebase";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 import { UserOutlined } from "@ant-design/icons";
 
 const SignUp = () => {
   const [form] = Form.useForm();
   const [signupStatus, setSignupStatus] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
-  const [displayName, setDisplayName] = useState("");
+
+  const storage = getStorage(); // Initialize Firebase storage
+
+  const handleAvatarUpload = (file) => {
+    // Set the avatar URL in state when an image is selected
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setAvatarUrl(reader.result);
+      console.log("Avatar URL set:", reader.result);
+    };
+  };
 
   const onFinish = async (values) => {
     try {
@@ -19,21 +36,52 @@ const SignUp = () => {
       );
 
       const user = userCredential.user;
-      console.log(values.fullName);
 
-      // Update user profile
-      await updateProfile(user, {
-        displayName: values.fullName,
-        photoURL: avatarUrl,
-      });
+      // Debugging: Log user UID
+      console.log("User UID:", user.uid);
 
-      // Set displayName in component state
-      setDisplayName(values.fullName);
-
-      // Upload avatar if it exists
+      // Upload the avatar if an image is selected
+      // Upload the avatar if an image is selected
       if (avatarUrl) {
-        const avatarRef = storage.ref(`avatars/${user.uid}`);
-        await avatarRef.putString(avatarUrl, "data_url");
+        // Create a reference to the user's avatar in Firebase Storage
+        const avatarRef = storageRef(storage, `avatars/${user.uid}/avatar.jpg`);
+
+        // Convert the avatarUrl to a Blob and upload it
+        fetch(avatarUrl)
+          .then((response) => response.blob())
+          .then((blob) => {
+            // Upload the Blob data to Firebase Storage
+            return uploadBytes(avatarRef, blob);
+          })
+          .then(() => {
+            // Get the download URL of the uploaded avatar
+            return getDownloadURL(avatarRef);
+          })
+          .then((avatarDownloadUrl) => {
+            // Debugging: Log avatar download URL
+            console.log("Avatar Download URL:", avatarDownloadUrl);
+
+            // Update user profile with full name and avatar URL
+            return updateProfile(user, {
+              displayName: values.fullName,
+              photoURL: avatarDownloadUrl,
+            });
+          })
+          .then(() => {
+            // Set signup success status
+            setSignupStatus("success");
+            message.success(`Sign up successful!`);
+          })
+          .catch((error) => {
+            console.error("Avatar upload error:", error);
+            setSignupStatus("fail");
+            message.error("Sign up failed. Please try again.");
+          });
+      } else {
+        // If no avatar was uploaded, update the user profile with just the full name
+        await updateProfile(user, {
+          displayName: values.fullName,
+        });
       }
 
       // Set signup success status
@@ -44,16 +92,6 @@ const SignUp = () => {
       setSignupStatus("fail");
       message.error("Sign up failed. Please try again.");
     }
-  };
-
-  const handleAvatarUpload = (file) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setAvatarUrl(reader.result);
-    };
-
-    reader.readAsDataURL(file);
   };
 
   return (

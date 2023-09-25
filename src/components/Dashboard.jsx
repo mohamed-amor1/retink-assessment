@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Card, Button, Col, Input, Row } from "antd";
+import { Layout, Menu, Card, Button, Col, Input, Row, Avatar } from "antd";
 import {
+  CalendarOutlined,
+  BellOutlined,
   HomeOutlined,
   LogoutOutlined,
   SettingOutlined,
@@ -14,14 +16,21 @@ import {
 import "./Dashboard.css";
 import { auth } from "../firebase";
 
+import { getStorage, ref, getDownloadURL } from "firebase/storage"; // Import Firebase Storage functions
+
 const { Header, Content, Footer, Sider } = Layout;
 
 const Dashboard = ({ displayName }) => {
   const isLoggedIn = !!auth.currentUser;
+  const [avatarURL, setAvatarURL] = useState(null); // State to store the avatar URL
 
   const headerStyle = {
     textAlign: "left",
-    background: "linear-gradient(to right, #d9a7c7, #fffcdc)",
+    alignItems: "left",
+    background: "#f1edfd",
+    margin: 0, // Add this line
+    padding: 0, // Add this line
+    boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 50px",
   };
 
   const contentStyle = {
@@ -40,6 +49,24 @@ const Dashboard = ({ displayName }) => {
       console.error("Logout error:", error);
     }
   };
+
+  // Move the retrieval of the avatar URL into an effect
+  useEffect(() => {
+    const getAvatarUrl = async () => {
+      try {
+        const userUid = auth.currentUser.uid;
+        const avatarRef = ref(getStorage(), `avatars/${userUid}/avatar.jpg`);
+        const avatarURL = await getDownloadURL(avatarRef);
+        setAvatarURL(avatarURL);
+      } catch (error) {
+        console.error("Error getting avatar URL:", error);
+      }
+    };
+
+    if (isLoggedIn) {
+      getAvatarUrl();
+    }
+  }, [isLoggedIn]); // Only run this effect when the login status changes
 
   if (!isLoggedIn) {
     return null;
@@ -155,25 +182,40 @@ const Dashboard = ({ displayName }) => {
       <Layout>
         <Header style={headerStyle}>
           <Row
+            justify="space-between"
+            align="middle"
             style={{
-              marginTop: "10px",
-              height: "50%",
-              display: "flex",
-              justifyContent: "space-evenly",
+              marginLeft: 0,
+              padding: 0,
+              boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 50px",
             }}
+            className="first-col"
           >
-            <Input
-              placeholder="Search for templates, projects, etc"
-              style={{ width: "30%" }}
-              prefix={
-                <SearchOutlined
-                  className="site-form-item-icon"
-                  style={{ fontSize: "20px" }}
-                />
-              }
-              suffix={<CloseCircleFilled />}
-            />
-            <Button id="create-btn-1">Create Content</Button>
+            <Col span={10}>
+              <Input
+                placeholder="Search for templates, projects, etc"
+                size="large"
+                allowClear
+                style={{
+                  marginRight: "10px",
+                  marginLeft: 10,
+                  boxShadow:
+                    "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
+                }}
+                prefix={<SearchOutlined className="site-form-item-icon" />}
+              />
+            </Col>
+            <Col span={10}>
+              <Button id="create-btn-1" size="large">
+                Create Content
+              </Button>
+            </Col>
+
+            <Col>
+              <CalendarOutlined className="icon" style={{ fontSize: "30px" }} />
+              <BellOutlined className="icon" style={{ fontSize: "30px" }} />
+              <Avatar size="large" src={avatarURL} />
+            </Col>
           </Row>
         </Header>
         <Content style={contentStyle}>
@@ -185,7 +227,7 @@ const Dashboard = ({ displayName }) => {
               width: "100%",
               textAlign: "left",
               boxShadow:
-                "  rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px",
+                "  rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px ",
             }}
           >
             <h1

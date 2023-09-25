@@ -56,7 +56,7 @@ function App() {
       <ConfigProvider
         theme={{
           token: {
-            fontFamily: "'Noto Sans', sans-serif ",
+            fontFamily: "'Fira Sans', sans-serif ",
           },
         }}
       >
