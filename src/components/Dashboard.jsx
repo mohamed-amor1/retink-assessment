@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Card, Button, Col, Input, Row, Avatar } from "antd";
 import {
-  CalendarOutlined,
+  Layout,
+  Menu,
+  Card,
+  Button,
+  Col,
+  Input,
+  Row,
+  Avatar,
+  message,
+  Tooltip,
+} from "antd";
+import {
+  CalendarTwoTone,
   BellOutlined,
   HomeOutlined,
+  DollarOutlined,
   LogoutOutlined,
+  UserOutlined,
   SettingOutlined,
   SearchOutlined,
   EditOutlined,
   RiseOutlined,
   FormOutlined,
   SnippetsOutlined,
-  CloseCircleFilled,
 } from "@ant-design/icons";
 import "./Dashboard.css";
 import { auth } from "../firebase";
@@ -20,9 +32,10 @@ import { getStorage, ref, getDownloadURL } from "firebase/storage"; // Import Fi
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const Dashboard = ({ displayName }) => {
+const Dashboard = () => {
   const isLoggedIn = !!auth.currentUser;
   const [avatarURL, setAvatarURL] = useState(null); // State to store the avatar URL
+  const [displayName, setDisplayName] = useState("");
 
   const headerStyle = {
     textAlign: "left",
@@ -45,6 +58,7 @@ const Dashboard = ({ displayName }) => {
   const handleLogout = async () => {
     try {
       await auth.signOut();
+      message.success("Logged out successfully!");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -52,21 +66,39 @@ const Dashboard = ({ displayName }) => {
 
   // Move the retrieval of the avatar URL into an effect
   useEffect(() => {
-    const getAvatarUrl = async () => {
-      try {
-        const userUid = auth.currentUser.uid;
-        const avatarRef = ref(getStorage(), `avatars/${userUid}/avatar.jpg`);
-        const avatarURL = await getDownloadURL(avatarRef);
-        setAvatarURL(avatarURL);
-      } catch (error) {
-        console.error("Error getting avatar URL:", error);
-      }
-    };
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is logged in, set the display name and fetch the avatar
+        setDisplayName(user.displayName);
 
-    if (isLoggedIn) {
-      getAvatarUrl();
-    }
-  }, [isLoggedIn]); // Only run this effect when the login status changes
+        // Fetch avatar as you were doing in your original code
+        const getAvatarUrl = async () => {
+          try {
+            const userUid = user.uid;
+            const avatarRef = ref(
+              getStorage(),
+              `avatars/${userUid}/avatar.jpg`
+            );
+            const avatarURL = await getDownloadURL(avatarRef);
+            setAvatarURL(avatarURL);
+          } catch (error) {
+            console.error("Error getting avatar URL:", error);
+          }
+        };
+
+        getAvatarUrl();
+      } else {
+        // User is logged out, clear display name and avatar
+        setDisplayName(null);
+        setAvatarURL(null);
+      }
+    });
+
+    return () => {
+      // Unsubscribe from the listener when the component unmounts
+      unsubscribe();
+    };
+  }, []);
 
   if (!isLoggedIn) {
     return null;
@@ -111,7 +143,15 @@ const Dashboard = ({ displayName }) => {
           <Menu
             mode="vertical"
             defaultSelectedKeys={["1"]}
-            style={{ width: "100%" }}
+            style={{
+              width: "100%",
+              margin: "0",
+              padding: "0",
+              justifyContent: "space-between",
+              minWidth: 0,
+              flex: "auto",
+              backgroundColor: "#f1edfd",
+            }}
             inlineIndent="0"
           >
             <Menu.Item
@@ -120,19 +160,18 @@ const Dashboard = ({ displayName }) => {
                 <HomeOutlined
                   style={{
                     padding: "0",
-                    margin: "0 auto",
+                    margin: "0",
+                    fontSize: "30px",
                     alignItems: "center",
-                    fontSize: "20px",
                   }}
                 />
               }
               style={{
-                display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: 0,
                 margin: "0 auto",
-                marginBottom: "40vh",
+                textAlign: "center",
               }}
             />
 
@@ -141,28 +180,8 @@ const Dashboard = ({ displayName }) => {
               icon={
                 <SettingOutlined
                   style={{
-                    fontSize: "20px",
-                    padding: "0",
-                    margin: "0",
-                    alignItems: "center",
-                  }}
-                />
-              }
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 0,
-                marginBottom: "20vh",
-              }}
-            />
-            <Menu.Item
-              key="4"
-              icon={
-                <LogoutOutlined
-                  style={{
-                    fontSize: "20px",
-                    padding: "0",
+                    fontSize: "30px",
+                    padding: "10px",
                     margin: "0",
                     alignItems: "center",
                   }}
@@ -174,8 +193,29 @@ const Dashboard = ({ displayName }) => {
                 justifyContent: "center",
                 padding: 0,
               }}
-              onClick={handleLogout}
             />
+            <Tooltip title="Log out">
+              <Menu.Item
+                key="4"
+                icon={
+                  <LogoutOutlined
+                    style={{
+                      fontSize: "30px",
+                      padding: "0",
+                      margin: "0",
+                      alignItems: "center",
+                    }}
+                  />
+                }
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0,
+                }}
+                onClick={handleLogout}
+              />
+            </Tooltip>
           </Menu>
         </div>
       </Sider>
@@ -205,16 +245,58 @@ const Dashboard = ({ displayName }) => {
                 prefix={<SearchOutlined className="site-form-item-icon" />}
               />
             </Col>
-            <Col span={10}>
+            <Col
+              span={8}
+              justify="space-evenly"
+              align="middle"
+              style={{ padding: "0 10px" }}
+            >
               <Button id="create-btn-1" size="large">
                 Create Content
               </Button>
+              <Button
+                id="currency"
+                type="ghost"
+                size="large"
+                icon={<DollarOutlined />}
+                style={{
+                  borderRadius: "20px",
+                  backgroundColor: "#f1edfd",
+                  fontFamily: "monospace",
+                  fontWeight: "bold",
+                  marginLeft: "20px",
+                }}
+              >
+                20
+              </Button>
             </Col>
 
-            <Col>
-              <CalendarOutlined className="icon" style={{ fontSize: "30px" }} />
-              <BellOutlined className="icon" style={{ fontSize: "30px" }} />
-              <Avatar size="large" src={avatarURL} />
+            <Col span={6} justify="space-evenly" style={{ padding: "0 10px" }}>
+              <div className="icon-container">
+                <Tooltip title="Calendar">
+                  <CalendarTwoTone
+                    className="icon"
+                    style={{ fontSize: "25px" }}
+                    twoToneColor="#000"
+                  />
+                </Tooltip>
+                <Tooltip title="Notifications">
+                  <BellOutlined className="icon" style={{ fontSize: "25px" }} />
+                </Tooltip>
+                {avatarURL ? (
+                  <Avatar size="large" src={avatarURL} shape="square" />
+                ) : (
+                  <Avatar
+                    size="large"
+                    shape="square"
+                    icon={<UserOutlined />}
+                    style={{
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  />
+                )}
+              </div>
             </Col>
           </Row>
         </Header>
@@ -223,7 +305,11 @@ const Dashboard = ({ displayName }) => {
             bordered={false}
             className="dashboard-card"
             style={{
-              background: "url('/3.png')",
+              background: "url('/5599220.jpg')",
+              backgroundSize: "100% ",
+
+              backgroundRepeat: "no-repeat",
+
               width: "100%",
               textAlign: "left",
               boxShadow:
@@ -233,12 +319,35 @@ const Dashboard = ({ displayName }) => {
             <h1
               style={{
                 textAlign: "left",
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "'Calistoga', cursive",
               }}
             >
               Hey, {displayName ? displayName : "Guest"}!
             </h1>
-            <p>Let&apos;s create something awesome today! ✨💫</p>
+            <Row
+              style={{
+                marginLeft: 0,
+                padding: 0,
+              }}
+            >
+              <Col span={12}>
+                <p>Let&apos;s create something awesome today! ✨💫</p>
+              </Col>
+              <Col span={12} id="blurred">
+                <div className="background">
+                  <div className="foreground">
+                    <p>
+                      You should have more engagement by 6pm today, try posting
+                      then 📅.
+                    </p>
+                    <p>
+                      Try our SEO optimization tool to increase engagement by
+                      40% 🔥
+                    </p>
+                  </div>
+                </div>
+              </Col>
+            </Row>
             <Button id="create-btn">Start Creating</Button>
           </Card>
           <h2>Most Popular Tools</h2>

@@ -41,47 +41,36 @@ const SignUp = () => {
       console.log("User UID:", user.uid);
 
       // Upload the avatar if an image is selected
-      // Upload the avatar if an image is selected
       if (avatarUrl) {
         // Create a reference to the user's avatar in Firebase Storage
         const avatarRef = storageRef(storage, `avatars/${user.uid}/avatar.jpg`);
 
         // Convert the avatarUrl to a Blob and upload it
-        fetch(avatarUrl)
-          .then((response) => response.blob())
-          .then((blob) => {
-            // Upload the Blob data to Firebase Storage
-            return uploadBytes(avatarRef, blob);
-          })
-          .then(() => {
-            // Get the download URL of the uploaded avatar
-            return getDownloadURL(avatarRef);
-          })
-          .then((avatarDownloadUrl) => {
-            // Debugging: Log avatar download URL
-            console.log("Avatar Download URL:", avatarDownloadUrl);
+        const response = await fetch(avatarUrl);
+        const blob = await response.blob();
 
-            // Update user profile with full name and avatar URL
-            return updateProfile(user, {
-              displayName: values.fullName,
-              photoURL: avatarDownloadUrl,
-            });
-          })
-          .then(() => {
-            // Set signup success status
-            setSignupStatus("success");
-            message.success(`Sign up successful!`);
-          })
-          .catch((error) => {
-            console.error("Avatar upload error:", error);
-            setSignupStatus("fail");
-            message.error("Sign up failed. Please try again.");
-          });
+        // Upload the Blob data to Firebase Storage
+        await uploadBytes(avatarRef, blob);
+
+        // Get the download URL of the uploaded avatar
+        const avatarDownloadUrl = await getDownloadURL(avatarRef);
+
+        // Debugging: Log avatar download URL
+        console.log("Avatar Download URL:", avatarDownloadUrl);
+
+        // Update user profile with full name and avatar URL
+        await user.updateProfile({
+          displayName: values.fullName.toString(),
+          photoURL: avatarDownloadUrl,
+        });
+
+        console.log("User profile updated:", user.displayName);
       } else {
         // If no avatar was uploaded, update the user profile with just the full name
         await updateProfile(user, {
           displayName: values.fullName,
         });
+        console.log("User profile updated:", user.displayName);
       }
 
       // Set signup success status

@@ -4,6 +4,7 @@ import { ConfigProvider } from "antd";
 import { auth } from "./firebase";
 import { Spin } from "antd";
 import Dashboard from "./components/Dashboard";
+import SignUp from "./components/auth/SignUp";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -29,7 +30,7 @@ function App() {
 
         // Set refreshing to false after the initial load
         setRefreshing(false);
-      }, 2000);
+      }, 1000);
 
       return unsubscribe; // Cleanup the subscription when the component unmounts
     });
@@ -56,7 +57,18 @@ function App() {
       <ConfigProvider
         theme={{
           token: {
-            fontFamily: "'Fira Sans', sans-serif ",
+            fontFamily: "'IBM Plex Sans', sans-serif ",
+          },
+          components: {
+            Menu: {
+              itemActiveBg: "white",
+              itemSelectedBg: "#eae4fc",
+              itemSelectedColor: "#5e3eba",
+              itemMarginInline: "10px",
+              itemMarginBlock: "50px",
+              itemPaddingInline: "0",
+              itemBorderRadius: "10px",
+            },
           },
         }}
       >
