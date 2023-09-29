@@ -159,19 +159,18 @@ const Dashboard = () => {
               icon={
                 <HomeOutlined
                   style={{
-                    padding: "0",
-                    margin: "0",
+                    padding: "auto",
+                    margin: "0 auto",
                     fontSize: "30px",
                     alignItems: "center",
                   }}
                 />
               }
               style={{
+                display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: 0,
-                margin: "0 auto",
-                textAlign: "center",
               }}
             />
 
@@ -305,10 +304,7 @@ const Dashboard = () => {
             bordered={false}
             className="dashboard-card"
             style={{
-              background: "url('/5599220.jpg')",
               backgroundSize: "100% ",
-
-              backgroundRepeat: "no-repeat",
 
               width: "100%",
               textAlign: "left",

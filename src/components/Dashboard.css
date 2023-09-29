@@ -28,7 +28,7 @@ p {
 }
 
 .dashboard-card {
-  background: linear-gradient(to right, #d9a7c7, #fffcdc);
+  background: linear-gradient(to left, #d9a7c7, white);
   border-radius: 20px;
 }
 
@@ -92,4 +92,6 @@ p {
 .foreground {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
+  padding: 10px;
+  border-radius: 10px;
 }
