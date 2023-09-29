@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
   Layout,
+  Space,
   Menu,
   Card,
   Button,
   Col,
   Input,
   Row,
+  Dropdown,
   Avatar,
   message,
   Tooltip,
@@ -15,12 +17,15 @@ import {
   CalendarTwoTone,
   BellOutlined,
   HomeOutlined,
+  ProfileOutlined,
+  DownOutlined,
   DollarOutlined,
   LogoutOutlined,
   UserOutlined,
   SettingOutlined,
   SearchOutlined,
   EditOutlined,
+  LoadingOutlined,
   RiseOutlined,
   FormOutlined,
   SnippetsOutlined,
@@ -35,7 +40,42 @@ const { Header, Content, Footer, Sider } = Layout;
 const Dashboard = () => {
   const isLoggedIn = !!auth.currentUser;
   const [avatarURL, setAvatarURL] = useState(null); // State to store the avatar URL
-  const [displayName, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState(null);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const items = [
+    {
+      label: "1st menu item",
+      key: "1",
+      icon: <UserOutlined />,
+    },
+    {
+      label: "2nd menu item",
+      key: "2",
+      icon: <UserOutlined />,
+    },
+    {
+      label: "3rd menu item",
+      key: "3",
+      icon: <UserOutlined />,
+      danger: true,
+    },
+    {
+      label: "4rd menu item",
+      key: "4",
+      icon: <UserOutlined />,
+      danger: true,
+      disabled: true,
+    },
+  ];
+  const handleMenuClick = (e) => {
+    message.info("Click on menu item.");
+    console.log("click", e);
+  };
+  const menuProps = {
+    items,
+    onClick: handleMenuClick,
+  };
 
   const headerStyle = {
     textAlign: "left",
@@ -57,16 +97,23 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      message.success("Logged out successfully!");
+      setLogoutLoading(true); // Set loading state to true
+
+      // Add a one-second delay before actually logging out
+      setTimeout(async () => {
+        await auth.signOut();
+        message.success("Logged out successfully!");
+        setLogoutLoading(false); // Reset loading state to false when done
+      }, 1000); // 1000 milliseconds = 1 second
     } catch (error) {
       console.error("Logout error:", error);
+      setLogoutLoading(false); // Reset loading state to false in case of an error
     }
   };
 
   // Move the retrieval of the avatar URL into an effect
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onIdTokenChanged((user) => {
       if (user) {
         // User is logged in, set the display name and fetch the avatar
         setDisplayName(user.displayName);
@@ -89,7 +136,7 @@ const Dashboard = () => {
         getAvatarUrl();
       } else {
         // User is logged out, clear display name and avatar
-        setDisplayName(null);
+        setDisplayName("Guest"); // Set a default value for displayName
         setAvatarURL(null);
       }
     });
@@ -147,10 +194,13 @@ const Dashboard = () => {
               width: "100%",
               margin: "0",
               padding: "0",
-              justifyContent: "space-between",
               minWidth: 0,
               flex: "auto",
               backgroundColor: "#f1edfd",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-evenly",
+              height: "100%",
             }}
             inlineIndent="0"
           >
@@ -158,6 +208,26 @@ const Dashboard = () => {
               key="1"
               icon={
                 <HomeOutlined
+                  style={{
+                    padding: "auto",
+                    margin: "0 auto",
+                    fontSize: "30px",
+                    alignItems: "center",
+                  }}
+                />
+              }
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 0,
+              }}
+            />
+
+            <Menu.Item
+              key="2"
+              icon={
+                <ProfileOutlined
                   style={{
                     padding: "auto",
                     margin: "0 auto",
@@ -197,14 +267,25 @@ const Dashboard = () => {
               <Menu.Item
                 key="4"
                 icon={
-                  <LogoutOutlined
-                    style={{
-                      fontSize: "30px",
-                      padding: "0",
-                      margin: "0",
-                      alignItems: "center",
-                    }}
-                  />
+                  logoutLoading ? (
+                    <LoadingOutlined
+                      style={{
+                        fontSize: "30px",
+                        padding: "0",
+                        margin: "0",
+                        alignItems: "center",
+                      }}
+                    />
+                  ) : (
+                    <LogoutOutlined
+                      style={{
+                        fontSize: "30px",
+                        padding: "0",
+                        margin: "0",
+                        alignItems: "center",
+                      }}
+                    />
+                  )
                 }
                 style={{
                   display: "flex",
@@ -304,22 +385,40 @@ const Dashboard = () => {
             bordered={false}
             className="dashboard-card"
             style={{
-              backgroundSize: "100% ",
-
+              background: "url(./b.jpg)",
               width: "100%",
+              backgroundPosition: "center",
+              backgroundSize: "cover",
               textAlign: "left",
               boxShadow:
                 "  rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.04) 0px 10px 10px -5px ",
             }}
           >
-            <h1
-              style={{
-                textAlign: "left",
-                fontFamily: "'Calistoga', cursive",
-              }}
-            >
-              Hey, {displayName ? displayName : "Guest"}!
-            </h1>
+            <Col align="middle" style={{ marginBottom: "50px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <h1
+                  style={{
+                    textAlign: "left",
+                    fontFamily: "'Calistoga', cursive",
+                    margin: 0, // Remove margin to prevent extra space
+                  }}
+                >
+                  Hey, {displayName !== null ? displayName : "Guest"}!
+                </h1>
+                <Dropdown menu={menuProps}>
+                  <Button id="dropdown-btn">
+                    Zara Ventures <DownOutlined />
+                  </Button>
+                </Dropdown>
+              </div>
+            </Col>
+
             <Row
               style={{
                 marginLeft: 0,

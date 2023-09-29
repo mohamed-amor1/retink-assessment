@@ -73,7 +73,7 @@ function App() {
           },
         }}
       >
-        {user ? <Dashboard displayName={displayName} /> : <HomeTabs />}
+        {user ? <Dashboard /> : <HomeTabs />}
       </ConfigProvider>
     </div>
   );

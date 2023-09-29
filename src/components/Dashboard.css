@@ -6,6 +6,7 @@
   padding-left: 5%;
   padding-right: 5%;
   border: 2px solid purple;
+  margin-bottom: 20px;
 }
 #create-btn:hover {
   background: linear-gradient(to right, #cc2b5e, #753a88);
@@ -28,7 +29,6 @@ p {
 }
 
 .dashboard-card {
-  background: linear-gradient(to left, #d9a7c7, white);
   border-radius: 20px;
 }
 
@@ -94,4 +94,9 @@ p {
   backdrop-filter: blur(4px);
   padding: 10px;
   border-radius: 10px;
+}
+
+#dropdown-btn {
+  box-shadow: rgba(136, 165, 191, 0.48) 6px 2px 16px 0px,
+    rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
 }
