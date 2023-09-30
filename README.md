@@ -1,5 +1,7 @@
 # React Dashboard with Firebase Authentication and Storage
 
+![screenshot](screenshot.png)
+
 This project is a stylish and feature-rich dashboard built using Vite, React, and the Ant Design UI library. It also integrates Firebase authentication and storage for user management and avatar uploads. While the dashboard's visual elements are complete, the functionality of the buttons and features is left for you to implement according to your application's needs.
 
 ## Features
